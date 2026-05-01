@@ -1,6 +1,6 @@
 # GPU-Accelerated FM Radio Demodulator
 
-Real-time FM radio demodulation on the NVIDIA Jetson Orin Nano using CUDA kernels. Raw IQ samples stream from an RTL-SDR V4 dongle into a CUDA kernel pipeline that filters, decimates, and demodulates a live FM station to  audio output.
+Real-time FM radio demodulation on the NVIDIA Jetson Orin Nano using CUDA kernels. Raw IQ samples stream from an RTL-SDR V4 dongle into a CUDA kernel pipeline that filters, decimates, and demodulates a live FM station to audio output.
 
 ---
 
