@@ -1,0 +1,5 @@
+*.o
+*.bin
+*.wav
+fm_demod_gpu/fm_rx_gpu
+fm_demod_cpu/fm_rx_cpu
