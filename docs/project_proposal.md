@@ -25,6 +25,25 @@ The primary GPU programming challenges center on the FIR decimation kernel and h
 
 ---
 
+## Results
+
+Benchmarked on the Jetson Orin Nano - 60 s IQ capture at 95.1 MHz, 2.048 MSPS (9370 blocks x 131072 samples, 10 repetitions each). Block period at this sample rate is 64.0 ms.
+
+| Pipeline | Channels | Per-block | Real-time factor | CPU utilization |
+|---|---|---|---|---|
+| CPU (`fm_rx_cpu`) | 1 | 7.58 ms | 8.4x | 99.9% |
+| GPU naive (`fm_rx_gpu_naive`) | 1 | 1.46 ms | 43.9x | 16.0% |
+| GPU optimized (`fm_rx_gpu_opt`) | 1 | 0.36 ms | 180.0x | 66.4% |
+| GPU multi-channel (`fm_rx_gpu_multi`) | 5 | 1.14 ms | 56.0x | 57.6% |
+
+**Single-channel:** The baseline GPU pipeline is **5.2x faster** than the CPU reference. The optimized pipeline (`fm_demod_gpu_opt`) applies five additional GPU-specific improvements - shared-memory tiling on the FIR decimators, a shared-memory halo on the FM discriminator, a fused normalize+freq-shift kernel, a fused IQ channel decimator, and a parallel DC reduction - achieving a further **4.1x speedup** over baseline for a total of **21x over CPU**.
+
+**Multi-channel:** The multi-channel pipeline (`fm_rx_gpu_multi`) demodulates 5 FM stations simultaneously from a single wideband capture using one CUDA stream per channel. All N channel pipelines are enqueued before any `cudaStreamSynchronize` call, giving the GPU scheduler maximum latitude to overlap them. The result: 5 stations in 1.14 ms per block, still **56x real-time** with 5x the audio output. If the 5 channel pipelines ran serially that would cost 5 x 0.36 ms = 1.80 ms; concurrent streams bring it to 1.14 ms, a **37% saving from parallelism**. A notable data point: the 5-channel multi pipeline (1.14 ms) is actually *faster per RTL-SDR block* than the single-channel baseline (1.46 ms) while producing 5x the audio output.
+
+The higher CPU utilization on the optimized single-channel version (66.4% vs 16.0% on baseline) is expected: because the GPU finishes in 0.36 ms instead of 1.46 ms, `cudaStreamSynchronize` returns sooner and the CPU spends a larger fraction of wall time actively launching kernels. The multi-channel version (57.6%) sits between these - the GPU takes longer (1.14 ms) with N concurrent pipelines, so the CPU waits proportionally more than in the optimized single-channel case.
+
+---
+
 ## References
 
 1. RTL-SDR Blog. *V4 Dongle Initial Release.* https://www.rtl-sdr.com/rtl-sdr-blog-v4-dongle-initial-release/

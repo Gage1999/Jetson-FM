@@ -8,7 +8,7 @@ static void stage_iq_normalize(const uint8_t* in, float* out_i, float* out_q, in
 {
     for (int i = 0; i < n; i++) {
         // RTL-SDR uses offset binary: 127.5 is the zero point, not 128
-        out_i[i] = ((float)in[2*i]     - 127.5f) * (1.0f / 127.5f);
+        out_i[i] = ((float)in[2*i] - 127.5f) * (1.0f / 127.5f);
         out_q[i] = ((float)in[2*i + 1] - 127.5f) * (1.0f / 127.5f);
     }
 }

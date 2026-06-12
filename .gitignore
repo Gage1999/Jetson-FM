@@ -1,5 +1,8 @@
 *.o
 *.bin
 *.wav
-fm_demod_gpu/fm_rx_gpu
+fm_demod_gpu_naive/fm_rx_gpu_naive
+fm_demod_gpu_opt/fm_rx_gpu_opt
+fm_demod_gpu_multi/fm_rx_gpu_multi
 fm_demod_cpu/fm_rx_cpu
+data/

@@ -9,16 +9,16 @@
 #include <rtl-sdr.h>
 #include "fm_demod_cpu.h"
 
-#define DEFAULT_FREQ_HZ     95100000   // 95.1 MHz
-#define DEFAULT_SAMPLE_RATE   2048000
-#define BLOCK_SIZE             131072   // IQ pairs per RTL-SDR callback
-#define FIR_TAPS1                 127
-#define FIR_TAPS2                 127
-#define DECIM1                      7   // 2048000 / 7 = ~293 ksps (channel rate)
-#define DECIM2                      6   // ~293 ksps / 6 = ~48762 Hz (audio rate)
-#define CHAN_CUTOFF_HZ         100000   // rejects adjacent FM stations (100kHz)
-#define AUDIO_CUTOFF_HZ         15000   // FM mono audio bandwidth (15kHz)
-#define BENCH_REPS                 10
+#define DEFAULT_FREQ_HZ 95100000   // 95.1 MHz
+#define DEFAULT_SAMPLE_RATE 2048000
+#define BLOCK_SIZE 131072   // IQ pairs per RTL-SDR callback
+#define FIR_TAPS1 127
+#define FIR_TAPS2 127
+#define DECIM1 7   // 2048000 / 7 = ~293 ksps (channel rate)
+#define DECIM2 6   // ~293 ksps / 6 = ~48762 Hz (audio rate)
+#define CHAN_CUTOFF_HZ 100000   // rejects adjacent FM stations (100kHz)
+#define AUDIO_CUTOFF_HZ 15000   // FM mono audio bandwidth (15kHz)
+#define BENCH_REPS 10
 
 static volatile int running = 1;
 static FmDemodCpuContext* g_ctx = NULL;
@@ -42,7 +42,7 @@ static void write_wav_header(FILE* f, uint32_t sample_rate)
     uint32_t zero = 0;
     uint16_t channels = 1, bits = 16, audio_fmt = 1;
     uint32_t fmt_size = 16;
-    uint32_t byte_rate   = sample_rate * channels * (bits / 8);
+    uint32_t byte_rate = sample_rate * channels * (bits / 8);
     uint16_t block_align = (uint16_t)(channels * (bits / 8));
 
     fwrite("RIFF", 1, 4, f);
@@ -93,7 +93,7 @@ static void rtlsdr_callback(unsigned char* buf, uint32_t len, void* userctx)
 
     for (int i = 0; i < audio_out; i++) {
         float s = g_ctx->h_audio[i] * 32767.0f;
-        if (s >  32767.0f) s =  32767.0f;
+        if (s > 32767.0f) s = 32767.0f;
         if (s < -32768.0f) s = -32768.0f;
         int16_t sample = (int16_t)s;
         fwrite(&sample, sizeof(int16_t), 1, g_out_file);
@@ -158,9 +158,9 @@ static void run_bench(FmDemodCpuContext* ctx, const char* path, uint32_t samp_ra
     double per_ms = wall_ms / total;
     double period_ms = (double)ctx->block_size / (double)samp_rate * 1e3;
     double rt = period_ms / per_ms;
-    double cpu_us = (ru1.ru_utime.tv_sec  - ru0.ru_utime.tv_sec)  * 1e6
+    double cpu_us = (ru1.ru_utime.tv_sec - ru0.ru_utime.tv_sec) * 1e6
                   + (ru1.ru_utime.tv_usec - ru0.ru_utime.tv_usec)
-                  + (ru1.ru_stime.tv_sec  - ru0.ru_stime.tv_sec)  * 1e6
+                  + (ru1.ru_stime.tv_sec - ru0.ru_stime.tv_sec) * 1e6
                   + (ru1.ru_stime.tv_usec - ru0.ru_stime.tv_usec);
     double cpu_pct = cpu_us / (wall_ms * 1e3) * 100.0;
 
@@ -218,7 +218,7 @@ int main(int argc, char** argv)
                 fm_demod_cpu_process(ctx, ctx->h_raw, ctx->h_audio);
                 for (int i = 0; i < ctx->audio_size; i++) {
                     float s = ctx->h_audio[i] * 32767.0f;
-                    if (s >  32767.0f) s =  32767.0f;
+                    if (s > 32767.0f) s = 32767.0f;
                     if (s < -32768.0f) s = -32768.0f;
                     int16_t sample = (int16_t)s;
                     fwrite(&sample, sizeof(int16_t), 1, fout);
@@ -232,7 +232,7 @@ int main(int argc, char** argv)
             fprintf(stderr, "Wrote %.1f sec to: %s\n",
                     (double)n_written / audio_rate_actual, out_path);
 
-            ctx->phase  = 0.0f;
+            ctx->phase = 0.0f;
             ctx->last_i = 1.0f;
             ctx->last_q = 0.0f;
         }
@@ -266,7 +266,7 @@ int main(int argc, char** argv)
 
     // cutoff = f_c / Fs
     float taps1[FIR_TAPS1];
-    make_lowpass_taps(taps1, FIR_TAPS1, (float)CHAN_CUTOFF_HZ  / (float)samp_rate);
+    make_lowpass_taps(taps1, FIR_TAPS1, (float)CHAN_CUTOFF_HZ / (float)samp_rate);
 
     float taps2[FIR_TAPS2];
     make_lowpass_taps(taps2, FIR_TAPS2, (float)AUDIO_CUTOFF_HZ / (float)chan_rate);
